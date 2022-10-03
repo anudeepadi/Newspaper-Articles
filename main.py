@@ -1,11 +1,11 @@
 import requests as rs
 import json
 import os
-import sys
 import mysql.connector
 import sys
 import boto3
 import os
+import pyspark
 
 # An Data Engineering Project
 # This is a simple script to get the data from the API and save it in a file
@@ -32,6 +32,11 @@ def get_query(query):
 def save_data(data):
     with open("data.json", "w") as f:
         json.dump(data, f)
+
+def convert_to_parquet():
+    spark = pyspark.sql.SparkSession.builder.getOrCreate()
+    df = spark.read.json('data.json')
+    df.write.parquet('data.parquet')
 
 def upload_data_to_s3():
     s3 = boto3.resource('s3')
@@ -91,7 +96,7 @@ def main():
     data = get_query("SpaceX")
     save_data(data)
 
-
 if __name__ == "__main__":
     #send_to_dynamodb()
-    convert_data_to_csv()
+    #convert_data_to_csv()
+    convert_to_parquet()
